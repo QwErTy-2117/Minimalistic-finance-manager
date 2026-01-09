@@ -33,7 +33,6 @@ type TimeInterval = 'weekly' | 'monthly' | 'yearly';
 export function BalanceChart({
   transactions,
   initialBalance,
-  color = '#ffffff',
   title = 'Balance Trend',
   currency = 'USD',
   theme = 'dark',
@@ -54,11 +53,11 @@ export function BalanceChart({
     } else if (interval === 'monthly') {
       startDate = subDays(now, 29);
       points = eachDayOfInterval({ start: startDate, end: now });
-      formatStr = 'MM/yy'; // Changed to numbers as requested
+      formatStr = 'dd/MM';
     } else {
       startDate = subMonths(now, 11);
       points = eachMonthOfInterval({ start: startDate, end: now });
-      formatStr = 'MM/yyyy'; // Already numbers
+      formatStr = 'MMM yy';
     }
 
     return points.map((point) => {
@@ -83,15 +82,29 @@ export function BalanceChart({
     }).format(amount);
   };
 
-  // Theme-aware styles
-  const cardBg = isLight ? 'bg-white border-zinc-200/60 shadow-sm' : 'bg-zinc-900 border-zinc-800';
-  const titleColor = isLight ? 'text-zinc-900' : 'text-white';
-  const switcherBg = isLight ? 'bg-zinc-50 border-zinc-200/60' : 'bg-black/40 border-zinc-800';
-  const gridColor = isLight ? '#d4d4d8' : '#27272a';
-  const axisColor = isLight ? '#52525b' : '#71717a';
+  // Calculate the maximum width needed for Y-axis labels
+  const yAxisWidth = useMemo(() => {
+    if (chartData.length === 0) return 80;
+    
+    const maxValue = Math.max(...chartData.map(d => Math.abs(d.balance)));
+    const formattedMax = formatCurrency(maxValue);
+    // Estimate width: ~8px per character for the font size used
+    const estimatedWidth = formattedMax.length * 8 + 16; // 16px padding
+    return Math.max(80, Math.min(estimatedWidth, 120)); // Clamp between 80-120px
+  }, [chartData, currency]);
+
+  // Theme-aware styles - improved light mode colors
+  const cardBg = isLight ? 'bg-white border-zinc-300' : 'bg-zinc-900 border-zinc-800';
+  const titleColor = isLight ? 'text-zinc-800' : 'text-white';
+  const switcherBg = isLight ? 'bg-zinc-100 border-zinc-300' : 'bg-black/40 border-zinc-800';
+  const gridColor = isLight ? '#e4e4e7' : '#27272a';
+  const axisColor = isLight ? '#3f3f46' : '#71717a';
   const tooltipBg = isLight ? '#ffffff' : '#18181b';
-  const tooltipBorder = isLight ? '#d4d4d8' : '#3f3f46';
+  const tooltipBorder = isLight ? '#a1a1aa' : '#3f3f46';
   const tooltipTextColor = isLight ? '#18181b' : '#ffffff';
+  
+  // Grayscale chart line color based on theme
+  const chartColor = isLight ? '#52525b' : '#a1a1aa';
 
   return (
     <div className={`border rounded-2xl p-6 ${cardBg}`}>
@@ -104,9 +117,11 @@ export function BalanceChart({
               onClick={() => setInterval(i)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 interval === i
-                  ? `bg-white text-black ${isLight ? 'shadow-none border border-zinc-200' : 'shadow-none'}`
+                  ? isLight
+                    ? 'bg-white text-zinc-900 border border-zinc-300'
+                    : 'bg-white text-black'
                   : isLight 
-                    ? 'text-zinc-500 hover:bg-zinc-200 hover:text-black'
+                    ? 'text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900'
                     : 'text-gray-500 hover:bg-white hover:text-black'
               }`}
             >
@@ -118,11 +133,11 @@ export function BalanceChart({
 
       <div className="h-64 w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={chartData} margin={{ top: 10, right: 0, left: -20, bottom: 5 }}>
+          <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 5 }}>
             <defs>
               <linearGradient id={`colorBalance-${title.replace(/\s/g, '')}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={color} stopOpacity={0.3} />
-                <stop offset="95%" stopColor={color} stopOpacity={0} />
+                <stop offset="5%" stopColor={chartColor} stopOpacity={isLight ? 0.2 : 0.3} />
+                <stop offset="95%" stopColor={chartColor} stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
@@ -140,7 +155,7 @@ export function BalanceChart({
               tickLine={false}
               axisLine={false}
               tickFormatter={(value) => formatCurrency(Number(value))}
-              width={50}
+              width={yAxisWidth}
             />
             <Tooltip
               contentStyle={{
@@ -150,12 +165,13 @@ export function BalanceChart({
                 color: tooltipTextColor,
               }}
               itemStyle={{ color: tooltipTextColor }}
+              labelStyle={{ color: isLight ? '#52525b' : '#a1a1aa', marginBottom: '4px' }}
               formatter={(value) => [formatCurrency(Number(value)), 'Balance']}
             />
             <Area
               type="monotone"
               dataKey="balance"
-              stroke={color}
+              stroke={chartColor}
               strokeWidth={2}
               fillOpacity={1}
               fill={`url(#colorBalance-${title.replace(/\s/g, '')})`}
