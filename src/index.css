@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+:root {
+  background-color: black;
+  color-scheme: dark;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#root {
+  height: 100%;
+  overflow: hidden;
+  background-color: black;
+}
+
+/* Dark mode default */
+html[data-theme="dark"],
+html[data-theme="dark"] body,
+html[data-theme="dark"] #root {
+  background-color: black;
+  color-scheme: dark;
+}
+
+/* Light mode */
+html[data-theme="light"] {
+  color-scheme: light;
+}
+
+html[data-theme="light"],
+html[data-theme="light"] body,
+html[data-theme="light"] #root {
+  background-color: #f0f0f0;
+}
+
+/* No filter-based theming.
+   Light/Dark mode is handled via component classes + base backgrounds here. */
+
+/* Prevent scroll chaining / white flashes */
+html, body, #root {
+  background-color: black;
+}
+
+html[data-theme="light"],
+html[data-theme="light"] body,
+html[data-theme="light"] #root {
+  background-color: #f5f5f5;
+}
+
+/* Hide scrollbars but keep scroll functionality */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Custom scrollbar styling for main content */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #3f3f46 transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #3f3f46;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #52525b;
+}
+
+html[data-theme="light"] .custom-scrollbar {
+  scrollbar-color: #a1a1aa transparent;
+}
+
+html[data-theme="light"] .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #a1a1aa;
+}
+
+html[data-theme="light"] .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #71717a;
+}
