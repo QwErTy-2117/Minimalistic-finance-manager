@@ -2,7 +2,7 @@
 
 A modern, minimalistic black-and-white personal finance manager built with React, Vite, and Tailwind CSS.
 
-![Alt Text](assets\screenshots\dark mode\Screenshot 2026-01-09 at 18-12-23 Finance Manager.png)
+![Finance Manager Screenshot](assets/screenshots/dark%20mode/Screenshot%202026-01-09%20at%2018-12-23%20Finance%20Manager.png)
 
 ## Features
 
